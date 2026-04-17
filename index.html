@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>IR Mobile Game Lab</title>
+<style>
+:root {
+  --bg: #07111f;
+  --bg2: #0d1f37;
+  --card: rgba(255,255,255,0.08);
+  --line: rgba(255,255,255,0.12);
+  --text: #eef5ff;
+  --muted: #c1cfe4;
+  --accent: #74d3ff;
+  --accent2: #8bf3c1;
+  --gold: #ffd166;
+  --bad: #ff9ca3;
+  --good: #7ef0a4;
+  --shadow: 0 16px 42px rgba(0,0,0,.28);
+  --radius: 22px;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin:0; min-height:100%; }
+body {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top right, rgba(116, 211, 255, .16), transparent 30%),
+    radial-gradient(circle at top left, rgba(139, 243, 193, .12), transparent 26%),
+    linear-gradient(160deg, var(--bg), var(--bg2));
+}
+.app {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 14px 14px 90px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+.hero {
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::after {
+  content:"";
+  position:absolute;
+  width:180px; height:180px;
+  right:-40px; bottom:-60px;
+  border-radius:50%;
+  background: radial-gradient(circle, rgba(116,211,255,.24), transparent 70%);
+}
+h1, h2, h3, p { margin-top:0; }
+h1 {
+  font-size: clamp(1.7rem, 6vw, 2.65rem);
+  line-height: 1.04;
+  letter-spacing: -.03em;
+  margin-bottom: 12px;
+}
+h2 { font-size: 1.15rem; margin-bottom: 12px; }
+h3 { font-size: 1rem; margin-bottom: 8px; }
+p { line-height: 1.55; }
+.lead { color: var(--muted); }
+.chip {
+  display:inline-flex; gap:8px; align-items:center;
+  padding:8px 12px; border-radius:999px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  color: var(--muted);
+  margin-bottom: 10px;
+  font-size: .92rem;
+}
+.row {
+  display:flex; gap:12px; flex-wrap:wrap;
+}
+.metrics {
+  display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; margin-top:14px;
+}
+.metric {
+  padding:12px; border-radius:18px; background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+}
+.metric strong { display:block; font-size:1.15rem; margin-bottom:2px; }
+.toolbar {
+  display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin: 14px 0 18px;
+}
+button, select, input {
+  font: inherit;
+}
+.btn, select, .input {
+  width:100%;
+  min-height:48px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(4,10,18,.72);
+  color: var(--text);
+  padding: 12px 14px;
+}
+.btn {
+  cursor:pointer;
+  font-weight:700;
+}
+.btn.primary {
+  background: linear-gradient(135deg, rgba(116,211,255,.22), rgba(139,243,193,.16));
+  border-color: rgba(139,243,193,.4);
+}
+.btn.warn {
+  background: linear-gradient(135deg, rgba(255,209,102,.18), rgba(255,255,255,.08));
+}
+.btn.ghost {
+  background: rgba(255,255,255,.06);
+}
+.btn.active {
+  border-color: rgba(139,243,193,.52);
+}
+.section {
+  margin-top: 14px;
+}
+.hidden { display:none !important; }
+.grid {
+  display:grid;
+  gap:14px;
+}
+.canvas-wrap {
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+}
+canvas {
+  display:block;
+  width:100%;
+  height:auto;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+}
+.axis {
+  display:flex; justify-content:space-between; gap:6px; color:var(--muted); font-size:.8rem; margin-top:8px;
+}
+.badge {
+  display:inline-flex; align-items:center; gap:8px; padding:8px 10px;
+  border-radius:999px; background: rgba(139,243,193,.10); border:1px solid rgba(139,243,193,.2);
+  color: var(--accent2); font-weight:700;
+}
+.title-line {
+  display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;
+}
+.svg-box {
+  min-height: 240px;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+}
+svg {
+  width:100%;
+  height:260px;
+}
+.info-box {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(116,211,255,.09);
+  border: 1px solid rgba(116,211,255,.18);
+  line-height:1.5;
+}
+.tag-row {
+  display:flex; gap:8px; flex-wrap:wrap;
+}
+.tag {
+  border:1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 999px;
+  cursor:pointer;
+  font-size:.9rem;
+}
+.card-list {
+  display:grid; gap:10px;
+}
+.mini-card {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  color: var(--muted);
+}
+.mini-card strong { color: var(--text); display:block; margin-bottom:4px; }
+.nav {
+  position: fixed;
+  left: 0; right:0; bottom:0;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(4,10,18,.9);
+  border-top: 1px solid rgba(255,255,255,.08);
+  backdrop-filter: blur(12px);
+}
+.nav-grid {
+  max-width: 980px; margin: 0 auto;
+  display:grid; grid-template-columns: 1fr 1fr; gap:10px;
+}
+.panel {
+  padding: 16px;
+}
+.accordion {
+  overflow:hidden;
+}
+details {
+  border-top:1px solid rgba(255,255,255,.08);
+}
+details:first-child { border-top:none; }
+summary {
+  list-style:none;
+  cursor:pointer;
+  padding: 15px 0;
+  font-weight:700;
+}
+summary::-webkit-details-marker { display:none; }
+.details-body {
+  padding: 0 0 15px;
+}
+.game-hero {
+  display:grid; gap:12px;
+}
+.scoreboard {
+  display:grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr)); gap:10px;
+}
+.score-pill {
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  text-align:center;
+}
+.score-pill strong {
+  display:block; font-size: 1.25rem;
+}
+.phase-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  overflow:hidden;
+}
+.phase-fill {
+  height:100%;
+  width:0%;
+  background: linear-gradient(90deg, rgba(116,211,255,.9), rgba(139,243,193,.95));
+}
+.question {
+  font-size: 1.05rem;
+  line-height:1.45;
+}
+.answers {
+  display:grid; gap:10px; margin-top: 12px;
+}
+.answer {
+  width:100%;
+  text-align:left;
+  padding: 13px 14px;
+  border-radius: 16px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  cursor:pointer;
+}
+.answer.correct { background: rgba(126,240,164,.16); border-color: rgba(126,240,164,.55); }
+.answer.wrong { background: rgba(255,156,163,.16); border-color: rgba(255,156,163,.55); }
+.feedback {
+  min-height: 26px;
+  margin-top: 12px;
+  font-weight: 700;
+}
+.feedback.good { color: var(--good); }
+.feedback.bad { color: var(--bad); }
+.ranking {
+  display:grid; gap:8px;
+}
+.rank-row {
+  display:grid;
+  grid-template-columns: 42px 1fr auto;
+  gap:10px;
+  align-items:center;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+}
+.rank-pos {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display:grid; place-items:center;
+  background: rgba(255,209,102,.16);
+  color: var(--gold);
+  font-weight: 800;
+}
+.small {
+  font-size: .9rem; color: var(--muted);
+}
+.footer-note {
+  color: var(--muted);
+  text-align:center;
+  margin-top: 14px;
+  font-size:.92rem;
+}
+.overlay {
+  position: fixed;
+  inset:0;
+  display:flex;
+  align-items:flex-end;
+  background: rgba(1,4,8,.66);
+  padding: 14px;
+  z-index: 10;
+}
+.overlay-card {
+  width:100%;
+  max-width: 720px;
+  margin:0 auto;
+  padding: 18px;
+  border-radius: 26px 26px 18px 18px;
+  background: linear-gradient(180deg, rgba(10,24,42,.98), rgba(8,17,31,.98));
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow: var(--shadow);
+}
+.pulse {
+  animation: pulse 1.6s infinite;
+}
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.lives {
+  display:flex; gap:6px; justify-content:center; align-items:center; min-height: 30px;
+}
+.life {
+  font-size: 1.2rem;
+  filter: drop-shadow(0 2px 6px rgba(255,105,122,.25));
+}
+.life.lost { opacity: .22; filter:none; }
+.medal-pill {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-height: 48px;
+}
+.medal-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 12px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  font-weight:700;
+}
+.medal-bronze { color:#ffcf99; }
+.medal-silver { color:#e5eefc; }
+.medal-gold { color:#ffe089; }
+.medal-master { color:#8bf3c1; }
+.utility-row {
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+}
+.icon-btn {
+  width:auto; min-width:48px;
+}
+.final-screen {
+  display:grid; gap:12px;
+  padding: 16px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(116,211,255,.12), rgba(139,243,193,.08));
+  border: 1px solid rgba(139,243,193,.22);
+}
+.final-screen h3 { font-size: 1.2rem; margin-bottom: 4px; }
+.final-grid {
+  display:grid; gap:10px; grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
+}
+.final-stat {
+  padding: 12px; border-radius: 16px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08);
+}
+.final-stat strong { display:block; font-size:1.15rem; }
+.hero-crown {
+  font-size: 1.8rem;
+}
+.flash {
+  animation: flash 0.45s ease;
+}
+@keyframes flash {
+  0% { transform: scale(0.98); opacity:.7; }
+  100% { transform: scale(1); opacity:1; }
+}
+
+@media (min-width: 800px) {
+  .app { padding: 18px 18px 100px; }
+  .two-col { display:grid; grid-template-columns: 1.05fr .95fr; gap:14px; }
+  .three-col { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
+  .toolbar { grid-template-columns: 1.3fr repeat(4, auto); align-items:end; }
+  .metrics { grid-template-columns: repeat(4, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="card hero">
+    <div class="chip">📱 Jogo mobile de espectroscopia no infravermelho</div>
+    <h1>IR Game Lab: explorar, vibrar e jogar no celular</h1>
+    <p class="lead">
+      Esta versão foi pensada para sala de aula com celular: o aluno explora espectros e vibrações, toca nas bandas principais e depois entra em um <strong>jogo com 3 fases</strong> para marcar pontos e disputar o ranking da turma.
+    </p>
+    <div class="metrics">
+      <div class="metric"><strong>3 fases</strong>do fácil ao avançado</div>
+      <div class="metric"><strong>Ranking</strong>local ou web compartilhado</div>
+      <div class="metric"><strong>Explorar + jogar</strong>na mesma página</div>
+      <div class="metric"><strong>140 s + vidas</strong>desafio rápido em aula</div>
+    </div>
+    <div class="toolbar">
+      <input id="playerNameInput" class="input" placeholder="Digite o nome do aluno" maxlength="22">
+      <button id="saveNameBtn" class="btn primary">Salvar nome</button>
+      <button id="goExploreBtn" class="btn ghost">Modo explorar</button>
+      <button id="goGameBtn" class="btn warn pulse">Modo jogo</button>
+      <button id="resetRankingBtn" class="btn ghost">Limpar ranking</button>
+      <button id="soundToggleBtn" class="btn ghost">🔊 Sons ligados</button>
+    </div>
+    <div class="small">Dica: peça que cada aluno use o próprio nome para registrar a melhor pontuação no ranking.</div>
+  </section>
+
+  <section id="exploreSection" class="section grid">
+    <div class="card panel">
+      <div class="toolbar">
+        <label style="display:block;">
+          <div class="small" style="margin-bottom:6px;">Escolha uma molécula</div>
+          <select id="moleculeSelect"></select>
+        </label>
+        <button id="toggleRegions" class="btn active">Regiões IR</button>
+        <button id="toggleLabels" class="btn active">Rótulos</button>
+        <button id="randomMolecule" class="btn ghost">Surpresa</button>
+        <button id="startChallengeFromExplore" class="btn primary">Ir para o jogo</button>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="spectrumCanvas"></canvas>
+      </div>
+      <div class="axis">
+        <span>4000 cm⁻¹</span>
+        <span>Número de onda</span>
+        <span>500 cm⁻¹</span>
+      </div>
+      <p id="spectrumHint" class="lead" style="margin:10px 0 0;">
+        Toque em um pico do espectro para ver a vibração associada. As absorções aparecem como vales de transmitância.
+      </p>
+    </div>
+
+    <div class="two-col">
+      <section class="card panel">
+        <div class="title-line">
+          <div>
+            <h2 id="moleculeName">Molécula</h2>
+            <p id="moleculeDescription" class="lead" style="margin-bottom:0;"></p>
+          </div>
+          <div class="badge" id="moleculeFormula">—</div>
+        </div>
+        <div class="svg-box" style="margin-top:12px;">
+          <svg id="moleculeSvg" viewBox="0 0 520 280" aria-label="Animação de vibração molecular"></svg>
+        </div>
+        <div id="peakInfo" class="info-box" style="margin-top:12px;">
+          <strong>Selecione um pico no espectro.</strong><br>
+          A interpretação e a vibração aparecerão aqui.
+        </div>
+      </section>
+
+      <section class="card panel">
+        <h2>Bandas principais</h2>
+        <div id="peakTags" class="tag-row"></div>
+        <div class="accordion" style="margin-top:14px;">
+          <details open>
+            <summary>Como interpretar o espectro IR</summary>
+            <div class="details-body card-list">
+              <div class="mini-card"><strong>3700–2500 cm⁻¹</strong>Estiramentos X–H. Aqui aparecem O–H, N–H e C–H.</div>
+              <div class="mini-card"><strong>2500–2000 cm⁻¹</strong>Região de ligações triplas, como C≡C e C≡N.</div>
+              <div class="mini-card"><strong>2000–1500 cm⁻¹</strong>Região de duplas. O C=O costuma ser intenso e muito diagnóstico.</div>
+              <div class="mini-card"><strong>1500–500 cm⁻¹</strong>Impressão digital. Ajuda a diferenciar moléculas parecidas.</div>
+            </div>
+          </details>
+          <details>
+            <summary>Conceitos rápidos para aula</summary>
+            <div class="details-body card-list">
+              <div class="mini-card"><strong>Frequência vibracional</strong>Ligações mais fortes e átomos mais leves tendem a vibrar em frequências maiores.</div>
+              <div class="mini-card"><strong>Bandas largas</strong>Ligações de hidrogênio alargam fortemente a banda de O–H.</div>
+              <div class="mini-card"><strong>Carbonila</strong>O estiramento C=O geralmente aparece perto de 1700 cm⁻¹ e chama muita atenção.</div>
+              <div class="mini-card"><strong>Limite do IR</strong>O ideal é combinar IR com fórmula molecular, RMN e MS.</div>
+            </div>
+          </details>
+          <details>
+            <summary>Roteiro de interpretação para os alunos</summary>
+            <div class="details-body card-list">
+              <div class="mini-card"><strong>Passo 1</strong>Procure O–H ou N–H na região alta.</div>
+              <div class="mini-card"><strong>Passo 2</strong>Veja se há uma carbonila intensa perto de 1700 cm⁻¹.</div>
+              <div class="mini-card"><strong>Passo 3</strong>Observe C–O, C–N e a região de impressão digital.</div>
+              <div class="mini-card"><strong>Passo 4</strong>Conclua pela combinação do conjunto de sinais, não por uma banda isolada.</div>
+            </div>
+          </details>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section id="gameSection" class="section grid hidden">
+    <section class="card panel game-hero">
+      <div class="title-line">
+        <div>
+          <div class="chip">🎮 Desafio IR em 3 fases</div>
+          <h2 style="margin-bottom:6px;">Jogue no celular e suba no ranking</h2>
+          <p class="lead" id="gameIntroText" style="margin-bottom:0;">
+            Fase 1: reconhecer regiões. Fase 2: reconhecer vibrações. Fase 3: identificar a molécula pelo espectro. Agora com vidas, medalhas e sons.
+          </p>
+        </div>
+        <button id="startGameBtn" class="btn primary">Começar desafio</button>
+      </div>
+
+      <div class="scoreboard">
+        <div class="score-pill"><span class="small">Jogador</span><strong id="playerNameBadge">Visitante</strong></div>
+        <div class="score-pill"><span class="small">Pontuação</span><strong id="gameScore">0</strong></div>
+        <div class="score-pill"><span class="small">Sequência</span><strong id="gameStreak">0</strong></div>
+        <div class="score-pill"><span class="small">Tempo</span><strong id="gameTimer">140 s</strong></div>
+        <div class="score-pill"><span class="small">Vidas</span><div id="gameLives" class="lives">❤️❤️❤️</div></div>
+        <div class="score-pill medal-pill"><span class="small">Medalha</span><strong id="gameMedal">Sem medalha</strong></div>
+      </div>
+      <div class="utility-row">
+        <div class="small">Errou? perde uma vida. Acertou em sequência? ganha bônus.</div>
+        <button id="soundToggleGameBtn" class="btn ghost icon-btn">🔊 Som</button>
+      </div>
+
+      <div>
+        <div class="title-line" style="margin-bottom:8px;">
+          <span id="phaseLabel" class="badge">Fase 1</span>
+          <span id="roundLabel" class="small">Rodada 0 / 9</span>
+        </div>
+        <div class="phase-bar"><div id="phaseFill" class="phase-fill"></div></div>
+      </div>
+    </section>
+
+    <div class="two-col">
+      <section class="card panel">
+        <h2 id="challengeTitle">Painel do desafio</h2>
+        <div class="canvas-wrap">
+          <canvas id="gameCanvas"></canvas>
+        </div>
+        <div class="axis">
+          <span>4000 cm⁻¹</span>
+          <span>Espectro do desafio</span>
+          <span>500 cm⁻¹</span>
+        </div>
+        <div id="challengeHint" class="info-box" style="margin-top:12px;">
+          Toque em <strong>Começar desafio</strong> para iniciar o jogo.
+        </div>
+      </section>
+
+      <section class="card panel">
+        <div id="questionBox" class="question">
+          Digite seu nome e toque em <strong>Começar desafio</strong>.
+        </div>
+        <div id="gameAnswers" class="answers"></div>
+        <div id="gameFeedback" class="feedback"></div>
+        <div id="gameExplanation" class="lead" style="min-height:48px; margin-top:8px;"></div>
+        <div id="finalScreen" class="final-screen hidden flash">
+          <div class="utility-row">
+            <div>
+              <div class="chip">🏆 Resultado final</div>
+              <h3 id="finalTitle">Campeão do IR</h3>
+              <p id="finalSubtitle" class="lead" style="margin-bottom:0;">Veja seu desempenho e tente subir no topo do ranking.</p>
+            </div>
+            <div id="finalCrown" class="hero-crown">👑</div>
+          </div>
+          <div class="final-grid">
+            <div class="final-stat"><span class="small">Pontuação final</span><strong id="finalScore">0</strong></div>
+            <div class="final-stat"><span class="small">Medalha</span><strong id="finalMedal">—</strong></div>
+            <div class="final-stat"><span class="small">Vidas restantes</span><strong id="finalLives">0</strong></div>
+            <div class="final-stat"><span class="small">Maior sequência</span><strong id="finalStreak">0</strong></div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <button id="nextQuestionBtn" class="btn hidden">Próxima rodada</button>
+          <button id="restartGameBtn" class="btn ghost hidden">Jogar novamente</button>
+        </div>
+      </section>
+    </div>
+
+    <section class="three-col">
+      <section class="card panel">
+        <h2>As 3 fases</h2>
+        <div class="card-list">
+          <div class="mini-card"><strong>Fase 1 — Regiões</strong>Encontrar em que faixa do IR está a banda destacada antes do tempo acabar.</div>
+          <div class="mini-card"><strong>Fase 2 — Vibrações</strong>Reconhecer qual ligação ou grupo funcional produz a banda para manter as vidas.</div>
+          <div class="mini-card"><strong>Fase 3 — Molécula</strong>Usar o espectro inteiro para identificar a molécula correta e buscar a medalha máxima.</div>
+        </div>
+      </section>
+
+      <section class="card panel">
+        <h2>Ranking da turma</h2>
+        <div id="rankingStatus" class="mini-card" style="margin-bottom:10px;"><strong>Modo local</strong>O placar está salvo apenas neste aparelho. Para compartilhar na web, conecte a URL do Apps Script no bloco de configuração do arquivo.</div>
+        <div id="ranking" class="ranking"></div>
+      </section>
+
+      <section class="card panel">
+        <h2>Maior pontuação</h2>
+        <div class="mini-card">
+          <strong id="bestScoreText">Ainda sem recorde</strong>
+          <span id="bestScoreSub" class="small">Quando alguém finalizar o jogo, o melhor resultado aparecerá aqui.</span>
+        </div>
+        <div id="rankingModeNote" class="footer-note">O ranking fica salvo no navegador do celular usando armazenamento local.</div>
+      </section>
+    </section>
+  </section>
+
+  <div class="footer-note">Arquivo único HTML para compartilhar com os alunos por Moodle, WhatsApp ou GitHub Pages.</div>
+</div>
+
+<div id="welcomeOverlay" class="overlay">
+  <div class="overlay-card">
+    <div class="chip">👋 Bem-vindo ao laboratório mobile de IR</div>
+    <h2 style="font-size:1.35rem;">Primeiro, salve o nome do aluno</h2>
+    <p class="lead">Depois você pode explorar os espectros ou abrir o jogo de 3 fases. Nesta versão, o desafio tem 140 s e o ranking pode funcionar localmente ou de forma compartilhada na web.</p>
+    <div class="row">
+      <input id="overlayNameInput" class="input" placeholder="Ex.: Bruna" maxlength="22">
+      <button id="overlaySaveBtn" class="btn primary">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const molecules = {
+      ethanol: {
+        name: "Etanol",
+        formula: "C₂H₆O",
+        description: "Álcool com banda larga de O–H e forte absorção de C–O na região de impressão digital.",
+        atoms: [
+          { id: "C1", el: "C", x: 150, y: 145 },
+          { id: "C2", el: "C", x: 235, y: 145 },
+          { id: "O", el: "O", x: 325, y: 130 },
+          { id: "H_O", el: "H", x: 395, y: 95 },
+          { id: "H1", el: "H", x: 115, y: 95 },
+          { id: "H2", el: "H", x: 105, y: 195 },
+          { id: "H3", el: "H", x: 165, y: 210 },
+          { id: "H4", el: "H", x: 250, y: 95 },
+          { id: "H5", el: "H", x: 255, y: 210 }
+        ],
+        bonds: [
+          ["C1","C2",1], ["C2","O",1], ["O","H_O",1],
+          ["C1","H1",1], ["C1","H2",1], ["C1","H3",1], ["C2","H4",1], ["C2","H5",1]
+        ],
+        peaks: [
+          { center: 3350, width: 170, depth: 36, label: "O–H (largo)", info: "Banda larga de estiramento O–H, típica de álcool e influenciada por ligações de hidrogênio.", color: "#8bf3c1", mode: { type: "stretch", axis: [0.85, -0.55], atoms: ["O", "H_O"] } },
+          { center: 2970, width: 60, depth: 18, label: "C–H sp³", info: "Estiramento C–H de carbono saturado, comum em cadeias alifáticas.", color: "#74d3ff", mode: { type: "stretch", axis: [0.7, -0.2], atoms: ["C1", "H1"] } },
+          { center: 1450, width: 55, depth: 14, label: "δ C–H", info: "Deformação angular de C–H em grupo alifático.", color: "#ffd166", mode: { type: "bend", axis: [0.0, 1], atoms: ["H2", "C1", "H3"] } },
+          { center: 1050, width: 45, depth: 30, label: "C–O", info: "Estiramento C–O, bastante útil para reconhecer álcoois.", color: "#ff9ca3", mode: { type: "stretch", axis: [0.95, -0.15], atoms: ["C2", "O"] } }
+        ]
+      },
+      acetone: {
+        name: "Acetona",
+        formula: "C₃H₆O",
+        description: "Cetona clássica, com banda intensa e muito diagnóstica de carbonila perto de 1715 cm⁻¹.",
+        atoms: [
+          { id: "C1", el: "C", x: 140, y: 155 },
+          { id: "C2", el: "C", x: 240, y: 155 },
+          { id: "O", el: "O", x: 240, y: 72 },
+          { id: "C3", el: "C", x: 340, y: 155 },
+          { id: "H1", el: "H", x: 100, y: 105 },
+          { id: "H2", el: "H", x: 90, y: 205 },
+          { id: "H3", el: "H", x: 150, y: 225 },
+          { id: "H4", el: "H", x: 370, y: 105 },
+          { id: "H5", el: "H", x: 385, y: 205 },
+          { id: "H6", el: "H", x: 325, y: 225 }
+        ],
+        bonds: [
+          ["C1","C2",1], ["C2","O",2], ["C2","C3",1],
+          ["C1","H1",1], ["C1","H2",1], ["C1","H3",1], ["C3","H4",1], ["C3","H5",1], ["C3","H6",1]
+        ],
+        peaks: [
+          { center: 1715, width: 35, depth: 48, label: "C=O", info: "Estiramento carbonila forte e intenso, a assinatura principal da acetona no IR.", color: "#8bf3c1", mode: { type: "stretch", axis: [0, -1], atoms: ["C2", "O"] } },
+          { center: 2975, width: 58, depth: 18, label: "C–H sp³", info: "Estiramento de C–H alifático dos grupos metila.", color: "#74d3ff", mode: { type: "stretch", axis: [-0.6, -0.5], atoms: ["C1", "H1"] } },
+          { center: 1365, width: 40, depth: 16, label: "δ CH₃", info: "Deformações angulares dos grupos CH₃.", color: "#ffd166", mode: { type: "bend", axis: [0, 1], atoms: ["H2", "C1", "H3"] } }
+        ]
+      },
+      aceticAcid: {
+        name: "Ácido acético",
+        formula: "C₂H₄O₂",
+        description: "O ácido carboxílico combina banda de O–H muito larga com carbonila forte e absorções de C–O.",
+        atoms: [
+          { id: "C1", el: "C", x: 135, y: 160 },
+          { id: "C2", el: "C", x: 235, y: 160 },
+          { id: "O1", el: "O", x: 235, y: 78 },
+          { id: "O2", el: "O", x: 330, y: 160 },
+          { id: "H_O", el: "H", x: 405, y: 132 },
+          { id: "H1", el: "H", x: 97, y: 110 },
+          { id: "H2", el: "H", x: 94, y: 210 },
+          { id: "H3", el: "H", x: 150, y: 228 }
+        ],
+        bonds: [
+          ["C1","C2",1], ["C2","O1",2], ["C2","O2",1], ["O2","H_O",1],
+          ["C1","H1",1], ["C1","H2",1], ["C1","H3",1]
+        ],
+        peaks: [
+          { center: 3000, width: 330, depth: 44, label: "O–H ácido (muito largo)", info: "Ácidos carboxílicos mostram uma banda O–H muito larga, geralmente espalhada de 3300 a 2500 cm⁻¹.", color: "#8bf3c1", mode: { type: "stretch", axis: [0.9, -0.35], atoms: ["O2", "H_O"] } },
+          { center: 1710, width: 36, depth: 50, label: "C=O", info: "A carbonila do ácido carboxílico aparece forte e intensa perto de 1710 cm⁻¹.", color: "#74d3ff", mode: { type: "stretch", axis: [0, -1], atoms: ["C2", "O1"] } },
+          { center: 1280, width: 42, depth: 26, label: "C–O", info: "Estiramento C–O característico do grupo carboxílico.", color: "#ff9ca3", mode: { type: "stretch", axis: [1, 0], atoms: ["C2", "O2"] } }
+        ]
+      },
+      aniline: {
+        name: "Anilina",
+        formula: "C₆H₇N",
+        description: "Amina aromática com banda N–H e sinais do anel aromático na região de 1600 cm⁻¹ e 3030 cm⁻¹.",
+        atoms: [
+          { id: "R1", el: "C", x: 180, y: 90 },
+          { id: "R2", el: "C", x: 265, y: 90 },
+          { id: "R3", el: "C", x: 310, y: 155 },
+          { id: "R4", el: "C", x: 265, y: 220 },
+          { id: "R5", el: "C", x: 180, y: 220 },
+          { id: "R6", el: "C", x: 135, y: 155 },
+          { id: "N", el: "N", x: 75, y: 155 },
+          { id: "Hn1", el: "H", x: 40, y: 108 },
+          { id: "Hn2", el: "H", x: 38, y: 202 }
+        ],
+        bonds: [
+          ["R1","R2",2], ["R2","R3",1], ["R3","R4",2], ["R4","R5",1], ["R5","R6",2], ["R6","R1",1],
+          ["R6","N",1], ["N","Hn1",1], ["N","Hn2",1]
+        ],
+        peaks: [
+          { center: 3460, width: 60, depth: 20, label: "N–H", info: "Aminas primárias mostram absorções de N–H na região alta do espectro.", color: "#8bf3c1", mode: { type: "stretch", axis: [-0.6, -0.7], atoms: ["N", "Hn1"] } },
+          { center: 3030, width: 50, depth: 15, label: "C–H aromático", info: "Estiramento C–H do anel aromático, ligeiramente acima de 3000 cm⁻¹.", color: "#74d3ff", mode: { type: "stretch", axis: [0.6, -0.3], atoms: ["R1", "R2"] } },
+          { center: 1600, width: 40, depth: 24, label: "C=C aromático", info: "Vibrações do anel aromático aparecem na região de ligações duplas.", color: "#ffd166", mode: { type: "ring", axis: [0, 1], atoms: ["R1","R2","R3","R4","R5","R6"] } },
+          { center: 1250, width: 42, depth: 18, label: "C–N", info: "Estiramento C–N útil para reconhecer aminas aromáticas.", color: "#ff9ca3", mode: { type: "stretch", axis: [-1, 0], atoms: ["R6", "N"] } }
+        ]
+      },
+      benzaldehyde: {
+        name: "Benzaldeído",
+        formula: "C₇H₆O",
+        description: "Aldeído aromático com carbonila, bandas do anel aromático e o C–H aldeídico perto de 2720 cm⁻¹.",
+        atoms: [
+          { id: "R1", el: "C", x: 160, y: 90 },
+          { id: "R2", el: "C", x: 245, y: 90 },
+          { id: "R3", el: "C", x: 290, y: 155 },
+          { id: "R4", el: "C", x: 245, y: 220 },
+          { id: "R5", el: "C", x: 160, y: 220 },
+          { id: "R6", el: "C", x: 115, y: 155 },
+          { id: "C", el: "C", x: 355, y: 155 },
+          { id: "O", el: "O", x: 355, y: 78 },
+          { id: "H", el: "H", x: 430, y: 175 }
+        ],
+        bonds: [
+          ["R1","R2",2], ["R2","R3",1], ["R3","R4",2], ["R4","R5",1], ["R5","R6",2], ["R6","R1",1],
+          ["R3","C",1], ["C","O",2], ["C","H",1]
+        ],
+        peaks: [
+          { center: 1700, width: 36, depth: 48, label: "C=O", info: "A carbonila do aldeído aromático permanece intensa e muito diagnóstica.", color: "#8bf3c1", mode: { type: "stretch", axis: [0, -1], atoms: ["C", "O"] } },
+          { center: 2720, width: 30, depth: 20, label: "C–H aldeídico", info: "Banda característica do hidrogênio aldeídico, muitas vezes útil para diferenciar aldeídos de cetonas.", color: "#74d3ff", mode: { type: "stretch", axis: [1, 0.2], atoms: ["C", "H"] } },
+          { center: 1600, width: 40, depth: 22, label: "C=C aromático", info: "Padrão do anel aromático na região de ligações duplas.", color: "#ffd166", mode: { type: "ring", axis: [0, 1], atoms: ["R1","R2","R3","R4","R5","R6"] } },
+          { center: 3030, width: 50, depth: 14, label: "C–H aromático", info: "Estiramento C–H do anel aromático.", color: "#ff9ca3", mode: { type: "stretch", axis: [0.7, -0.3], atoms: ["R1", "R2"] } }
+        ]
+      }
+    };
+
+const APP_CONFIG = {
+  gameDurationSeconds: 140,
+  webRankingUrl: '' // cole aqui a URL do Web App do Google Apps Script para compartilhar o ranking na web
+};
+
+const ui = {
+  spectrumCanvas: document.getElementById('spectrumCanvas'),
+  gameCanvas: document.getElementById('gameCanvas'),
+  moleculeSelect: document.getElementById('moleculeSelect'),
+  moleculeSvg: document.getElementById('moleculeSvg'),
+  moleculeName: document.getElementById('moleculeName'),
+  moleculeFormula: document.getElementById('moleculeFormula'),
+  moleculeDescription: document.getElementById('moleculeDescription'),
+  peakInfo: document.getElementById('peakInfo'),
+  peakTags: document.getElementById('peakTags'),
+  spectrumHint: document.getElementById('spectrumHint'),
+  toggleRegions: document.getElementById('toggleRegions'),
+  toggleLabels: document.getElementById('toggleLabels'),
+  randomMolecule: document.getElementById('randomMolecule'),
+  exploreSection: document.getElementById('exploreSection'),
+  gameSection: document.getElementById('gameSection'),
+  goExploreBtn: document.getElementById('goExploreBtn'),
+  goGameBtn: document.getElementById('goGameBtn'),
+  startChallengeFromExplore: document.getElementById('startChallengeFromExplore'),
+  playerNameInput: document.getElementById('playerNameInput'),
+  saveNameBtn: document.getElementById('saveNameBtn'),
+  playerNameBadge: document.getElementById('playerNameBadge'),
+  gameScore: document.getElementById('gameScore'),
+  gameStreak: document.getElementById('gameStreak'),
+  gameTimer: document.getElementById('gameTimer'),
+  gameLives: document.getElementById('gameLives'),
+  gameMedal: document.getElementById('gameMedal'),
+  phaseLabel: document.getElementById('phaseLabel'),
+  roundLabel: document.getElementById('roundLabel'),
+  phaseFill: document.getElementById('phaseFill'),
+  challengeTitle: document.getElementById('challengeTitle'),
+  challengeHint: document.getElementById('challengeHint'),
+  questionBox: document.getElementById('questionBox'),
+  gameAnswers: document.getElementById('gameAnswers'),
+  gameFeedback: document.getElementById('gameFeedback'),
+  gameExplanation: document.getElementById('gameExplanation'),
+  startGameBtn: document.getElementById('startGameBtn'),
+  nextQuestionBtn: document.getElementById('nextQuestionBtn'),
+  restartGameBtn: document.getElementById('restartGameBtn'),
+  ranking: document.getElementById('ranking'),
+  rankingStatus: document.getElementById('rankingStatus'),
+  rankingModeNote: document.getElementById('rankingModeNote'),
+  bestScoreText: document.getElementById('bestScoreText'),
+  bestScoreSub: document.getElementById('bestScoreSub'),
+  resetRankingBtn: document.getElementById('resetRankingBtn'),
+  soundToggleBtn: document.getElementById('soundToggleBtn'),
+  soundToggleGameBtn: document.getElementById('soundToggleGameBtn'),
+  finalScreen: document.getElementById('finalScreen'),
+  finalTitle: document.getElementById('finalTitle'),
+  finalSubtitle: document.getElementById('finalSubtitle'),
+  finalScore: document.getElementById('finalScore'),
+  finalMedal: document.getElementById('finalMedal'),
+  finalLives: document.getElementById('finalLives'),
+  finalStreak: document.getElementById('finalStreak'),
+  finalCrown: document.getElementById('finalCrown'),
+  overlay: document.getElementById('welcomeOverlay'),
+  overlayNameInput: document.getElementById('overlayNameInput'),
+  overlaySaveBtn: document.getElementById('overlaySaveBtn')
+};
+
+const state = {
+  currentKey: 'ethanol',
+  selectedPeak: null,
+  showRegions: true,
+  showLabels: true,
+  animationTime: 0,
+  playerName: localStorage.getItem('ir_player_name') || '',
+  game: {
+    running: false,
+    totalRounds: 9,
+    round: 0,
+    phase: 1,
+    score: 0,
+    streak: 0,
+    bestStreak: 0,
+    lives: 3,
+    answered: false,
+    current: null,
+    timeLeft: APP_CONFIG.gameDurationSeconds,
+    timerHandle: null
+  },
+  rankingCache: [],
+  soundEnabled: JSON.parse(localStorage.getItem('ir_sound_enabled') || 'true'),
+  audioCtx: null
+};
+
+const STORAGE_KEY = 'ir_mobile_ranking_v1';
+
+function resizeCanvas(canvas, height=260) {
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  const cssWidth = canvas.clientWidth || canvas.parentElement.clientWidth || 320;
+  canvas.width = Math.round(cssWidth * dpr);
+  canvas.height = Math.round(height * dpr);
+  canvas.style.height = height + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return ctx;
+}
+
+function getCtx(canvas, height) {
+  return resizeCanvas(canvas, height);
+}
+
+function currentMolecule() {
+  return molecules[state.currentKey];
+}
+
+function populateSelect() {
+  ui.moleculeSelect.innerHTML = '';
+  Object.entries(molecules).forEach(([key, mol]) => {
+    const option = document.createElement('option');
+    option.value = key;
+    option.textContent = `${mol.name} — ${mol.formula}`;
+    ui.moleculeSelect.appendChild(option);
+  });
+  ui.moleculeSelect.value = state.currentKey;
+}
+
+function atomColor(el) {
+  if (el === 'O') return '#ff8a9a';
+  if (el === 'N') return '#8ec7ff';
+  if (el === 'H') return '#f5f7fb';
+  return '#90a4b8';
+}
+
+function gaussian(x, c, w, d) {
+  const sigma = w / 2.355;
+  return d * Math.exp(-0.5 * Math.pow((x - c) / sigma, 2));
+}
+
+function buildPlot(canvas) {
+  const width = canvas.clientWidth || 320;
+  const height = parseFloat(canvas.style.height) || 260;
+  return {
+    width,
+    height,
+    left: 42,
+    top: 20,
+    right: width - 16,
+    bottom: height - 28
+  };
+}
+
+function xFromWavenumber(w, plot) {
+  const min = 500;
+  const max = 4000;
+  return plot.left + ((max - w) / (max - min)) * (plot.right - plot.left);
+}
+
+function wavenumberFromX(x, plot) {
+  const min = 500;
+  const max = 4000;
+  const ratio = (x - plot.left) / (plot.right - plot.left);
+  return max - ratio * (max - min);
+}
+
+function drawSpectrumToCanvas(canvas, mol, options = {}) {
+  const ctx = getCtx(canvas, options.height || 260);
+  const plot = buildPlot(canvas);
+  const w = plot.right - plot.left;
+  const h = plot.bottom - plot.top;
+  ctx.clearRect(0, 0, plot.width, plot.height);
+
+  const bg = ctx.createLinearGradient(0, plot.top, 0, plot.bottom);
+  bg.addColorStop(0, 'rgba(255,255,255,0.05)');
+  bg.addColorStop(1, 'rgba(255,255,255,0.01)');
+  ctx.fillStyle = bg;
+  ctx.fillRect(plot.left, plot.top, w, h);
+
+  if (options.showRegions) {
+    const regions = [
+      { start: 4000, end: 2500, color: 'rgba(116,211,255,0.09)', label: 'X–H' },
+      { start: 2500, end: 2000, color: 'rgba(255,209,102,0.08)', label: '≡' },
+      { start: 2000, end: 1500, color: 'rgba(139,243,193,0.08)', label: '= ' },
+      { start: 1500, end: 500, color: 'rgba(255,156,163,0.07)', label: 'Digital' }
+    ];
+    regions.forEach(region => {
+      const x1 = xFromWavenumber(region.start, plot);
+      const x2 = xFromWavenumber(region.end, plot);
+      ctx.fillStyle = region.color;
+      ctx.fillRect(Math.min(x1, x2), plot.top, Math.abs(x2 - x1), h);
+      ctx.fillStyle = 'rgba(238,245,255,0.55)';
+      ctx.font = '11px Inter, sans-serif';
+      ctx.fillText(region.label, Math.min(x1, x2) + 6, plot.top + 16);
+    });
+  }
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  ctx.lineWidth = 1;
+  ctx.font = '11px Inter, sans-serif';
+  ctx.fillStyle = 'rgba(238,245,255,0.6)';
+
+  for (let y = 0; y <= 4; y++) {
+    const yy = plot.top + (h / 4) * y;
+    ctx.beginPath();
+    ctx.moveTo(plot.left, yy);
+    ctx.lineTo(plot.right, yy);
+    ctx.stroke();
+  }
+
+  [4000, 3000, 2000, 1500, 1000, 500].forEach(val => {
+    const x = xFromWavenumber(val, plot);
+    ctx.beginPath();
+    ctx.moveTo(x, plot.bottom);
+    ctx.lineTo(x, plot.bottom + 4);
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(238,245,255,0.70)';
+    ctx.fillText(String(val), x - 12, plot.height - 8);
+  });
+
+  const points = [];
+  for (let i = 0; i <= 700; i++) {
+    const wn = 4000 - (3500 * i / 700);
+    let trans = 96;
+    mol.peaks.forEach(p => trans -= gaussian(wn, p.center, p.width, p.depth));
+    if (wn < 1600) trans -= 2.5 * Math.sin(wn / 32) + 1.4 * Math.cos(wn / 19);
+    trans = Math.max(3, Math.min(98, trans));
+    points.push({
+      x: xFromWavenumber(wn, plot),
+      y: plot.top + ((100 - trans) / 100) * h
+    });
+  }
+
+  ctx.beginPath();
+  points.forEach((pt, i) => i ? ctx.lineTo(pt.x, pt.y) : ctx.moveTo(pt.x, pt.y));
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#8fdcff';
+  ctx.shadowColor = 'rgba(116,211,255,0.35)';
+  ctx.shadowBlur = 12;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.strokeRect(plot.left, plot.top, w, h);
+
+  mol.peaks.forEach((peak, index) => {
+    const isSelected = options.selectedPeak === peak;
+    const isTarget = options.highlightPeak === peak;
+    if (!(options.showLabels || isSelected || isTarget)) return;
+    const x = xFromWavenumber(peak.center, plot);
+    ctx.strokeStyle = isSelected || isTarget ? '#8bf3c1' : 'rgba(255,255,255,0.18)';
+    ctx.setLineDash([4, 5]);
+    ctx.beginPath();
+    ctx.moveTo(x, plot.top + 6);
+    ctx.lineTo(x, plot.bottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    if (options.showLabels) {
+      ctx.fillStyle = isSelected || isTarget ? '#8bf3c1' : 'rgba(238,245,255,0.8)';
+      const yy = index % 2 === 0 ? plot.top + 16 : plot.top + 32;
+      ctx.fillText(peak.label, x - 18, yy);
+    }
+    if (isSelected || isTarget) {
+      ctx.fillStyle = peak.color || '#8bf3c1';
+      ctx.beginPath();
+      ctx.arc(x, plot.top + 10, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  });
+
+  if (options.customOverlay) options.customOverlay(ctx, plot);
+  return plot;
+}
+
+function getAnimatedPositions(mol, peak, t) {
+  const base = {};
+  mol.atoms.forEach(atom => base[atom.id] = { x: atom.x, y: atom.y });
+  if (!peak || !peak.mode) return base;
+  const phase = Math.sin(t / 240);
+  const amp = 7;
+  const mode = peak.mode;
+  if (mode.type === 'stretch' && mode.atoms.length >= 2) {
+    const [aId, bId] = mode.atoms;
+    const [dx, dy] = mode.axis;
+    base[aId].x -= dx * amp * phase;
+    base[aId].y -= dy * amp * phase;
+    base[bId].x += dx * amp * phase;
+    base[bId].y += dy * amp * phase;
+  } else if (mode.type === 'bend' && mode.atoms.length >= 3) {
+    const [aId, centerId, bId] = mode.atoms;
+    const bend = amp * 0.7 * phase;
+    base[aId].y -= bend;
+    base[bId].y += bend;
+    base[centerId].x += Math.cos(t / 260) * 1.5;
+  } else if (mode.type === 'ring') {
+    mode.atoms.forEach((id, idx) => {
+      const angle = (idx / mode.atoms.length) * Math.PI * 2;
+      base[id].x += Math.cos(angle) * phase * 4;
+      base[id].y += Math.sin(angle) * phase * 4;
+    });
+  }
+  return base;
+}
+
+function drawMolecule() {
+  const mol = currentMolecule();
+  const positions = getAnimatedPositions(mol, state.selectedPeak, state.animationTime);
+  const selected = state.selectedPeak?.mode?.atoms || [];
+  ui.moleculeSvg.innerHTML = '';
+
+  mol.bonds.forEach(([aId, bId, order]) => {
+    const a = positions[aId];
+    const b = positions[bId];
+    if (!a || !b) return;
+    const highlight = selected.includes(aId) && selected.includes(bId);
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const ox = -dy / len * 5;
+    const oy = dx / len * 5;
+
+    const drawLine = (offsetX, offsetY) => {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', a.x + offsetX);
+      line.setAttribute('y1', a.y + offsetY);
+      line.setAttribute('x2', b.x + offsetX);
+      line.setAttribute('y2', b.y + offsetY);
+      line.setAttribute('stroke', highlight ? '#8bf3c1' : 'rgba(255,255,255,0.72)');
+      line.setAttribute('stroke-width', highlight ? '5' : '3');
+      line.setAttribute('stroke-linecap', 'round');
+      ui.moleculeSvg.appendChild(line);
+    };
+
+    if (order === 2) {
+      drawLine(ox, oy);
+      drawLine(-ox, -oy);
+    } else {
+      drawLine(0, 0);
+    }
+  });
+
+  mol.atoms.forEach(atom => {
+    const p = positions[atom.id];
+    const isSelected = selected.includes(atom.id);
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', p.x);
+    circle.setAttribute('cy', p.y);
+    circle.setAttribute('r', atom.el === 'H' ? 18 : 24);
+    circle.setAttribute('fill', atomColor(atom.el));
+    circle.setAttribute('stroke', isSelected ? '#8bf3c1' : 'rgba(255,255,255,.22)');
+    circle.setAttribute('stroke-width', isSelected ? '4' : '2');
+    ui.moleculeSvg.appendChild(circle);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', p.x);
+    text.setAttribute('y', p.y + 1);
+    text.textContent = atom.el;
+    text.setAttribute('fill', atom.el === 'H' ? '#0f1f39' : '#081223');
+    text.setAttribute('style', 'font-weight:700; font-size:14px; dominant-baseline:middle; text-anchor:middle;');
+    ui.moleculeSvg.appendChild(text);
+  });
+}
+
+function updatePeakInfo() {
+  const peak = state.selectedPeak;
+  if (!peak) {
+    ui.peakInfo.innerHTML = '<strong>Selecione um pico no espectro.</strong><br>A interpretação e a vibração aparecerão aqui.';
+    ui.spectrumHint.textContent = 'Toque em um pico do espectro para ver a vibração associada. As absorções aparecem como vales de transmitância.';
+    return;
+  }
+  ui.peakInfo.innerHTML = `<strong>${peak.label} — ${peak.center} cm⁻¹</strong><br>${peak.info}`;
+  ui.spectrumHint.textContent = `Pico selecionado: ${peak.label}. Compare esta banda com as outras regiões do espectro para fazer a interpretação completa.`;
+}
+
+function updateExploreText() {
+  const mol = currentMolecule();
+  ui.moleculeName.textContent = mol.name;
+  ui.moleculeFormula.textContent = mol.formula;
+  ui.moleculeDescription.textContent = mol.description;
+  ui.peakTags.innerHTML = '';
+  mol.peaks.forEach(peak => {
+    const tag = document.createElement('button');
+    tag.className = 'tag';
+    tag.textContent = `${peak.label} • ${peak.center} cm⁻¹`;
+    tag.addEventListener('click', () => {
+      state.selectedPeak = peak;
+      updatePeakInfo();
+      renderExplore();
+    });
+    ui.peakTags.appendChild(tag);
+  });
+}
+
+function renderExplore() {
+  updateExploreText();
+  updatePeakInfo();
+  drawSpectrumToCanvas(ui.spectrumCanvas, currentMolecule(), {
+    showRegions: state.showRegions,
+    showLabels: state.showLabels,
+    selectedPeak: state.selectedPeak,
+    height: 270
+  });
+}
+
+function handleCanvasTouch(event) {
+  const rect = ui.spectrumCanvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const plot = buildPlot(ui.spectrumCanvas);
+  const wn = wavenumberFromX(x, plot);
+  let closest = null;
+  let minDist = Infinity;
+  currentMolecule().peaks.forEach(peak => {
+    const dist = Math.abs(peak.center - wn);
+    if (dist < minDist) {
+      minDist = dist;
+      closest = peak;
+    }
+  });
+  if (closest && minDist < 140) {
+    state.selectedPeak = closest;
+    updatePeakInfo();
+    renderExplore();
+  }
+}
+
+function shuffle(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function getAllLabels() {
+  const labels = [];
+  Object.values(molecules).forEach(m => m.peaks.forEach(p => labels.push(p.label)));
+  return [...new Set(labels)];
+}
+
+function getRegionLabel(center) {
+  if (center >= 2500) return 'Região alta (X–H / C–H)';
+  if (center >= 2000) return 'Região de triplas';
+  if (center >= 1500) return 'Região de duplas / carbonila';
+  return 'Impressão digital';
+}
+
+function phaseForRound(round) {
+  if (round <= 3) return 1;
+  if (round <= 6) return 2;
+  return 3;
+}
+
+function setPlayerName(name) {
+  const cleaned = (name || '').trim().slice(0, 22);
+  state.playerName = cleaned || 'Visitante';
+  localStorage.setItem('ir_player_name', state.playerName);
+  ui.playerNameInput.value = state.playerName === 'Visitante' ? '' : state.playerName;
+  ui.overlayNameInput.value = state.playerName === 'Visitante' ? '' : state.playerName;
+  ui.playerNameBadge.textContent = state.playerName;
+}
+
+function isWebRankingEnabled() {
+  return Boolean((APP_CONFIG.webRankingUrl || '').trim());
+}
+
+function getRanking() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveRanking(list) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+
+function updateLocalRanking(name, score) {
+  const ranking = getRanking();
+  const idx = ranking.findIndex(item => item.name.toLowerCase() === name.toLowerCase());
+  if (idx >= 0) {
+    if (score > ranking[idx].score) ranking[idx].score = score;
+  } else {
+    ranking.push({ name, score });
+  }
+  ranking.sort((a, b) => b.score - a.score);
+  const trimmed = ranking.slice(0, 10);
+  saveRanking(trimmed);
+  return trimmed;
+}
+
+function updateRankingStatus(message, online = false) {
+  if (!ui.rankingStatus) return;
+  ui.rankingStatus.innerHTML = online
+    ? `<strong>Modo web compartilhado</strong>${message}`
+    : `<strong>Modo local</strong>${message}`;
+  if (ui.rankingModeNote) {
+    ui.rankingModeNote.textContent = online
+      ? 'O ranking está compartilhado entre os alunos quando a página roda na web.'
+      : 'O ranking fica salvo no navegador do celular usando armazenamento local.';
+  }
+}
+
+function jsonpRequest(url) {
+  return new Promise((resolve, reject) => {
+    const callbackName = `irRankingCallback_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const script = document.createElement('script');
+    const cleanup = () => {
+      delete window[callbackName];
+      script.remove();
+    };
+    window[callbackName] = (data) => {
+      cleanup();
+      resolve(data);
+    };
+    script.onerror = () => {
+      cleanup();
+      reject(new Error('Falha ao acessar o ranking web.'));
+    };
+    const separator = url.includes('?') ? '&' : '?';
+    script.src = `${url}${separator}callback=${callbackName}`;
+    document.body.appendChild(script);
+  });
+}
+
+async function fetchWebRanking() {
+  const base = (APP_CONFIG.webRankingUrl || '').trim();
+  if (!base) return null;
+  const data = await jsonpRequest(`${base}?action=list`);
+  return Array.isArray(data?.ranking) ? data.ranking : [];
+}
+
+async function submitWebRanking(name, score) {
+  const base = (APP_CONFIG.webRankingUrl || '').trim();
+  if (!base) return null;
+  const query = `${base}?action=submit&name=${encodeURIComponent(name)}&score=${encodeURIComponent(score)}`;
+  const data = await jsonpRequest(query);
+  return Array.isArray(data?.ranking) ? data.ranking : [];
+}
+
+async function updateRanking(name, score) {
+  const localRanking = updateLocalRanking(name, score);
+  state.rankingCache = localRanking;
+  if (!isWebRankingEnabled()) return localRanking;
+
+  try {
+    const remoteRanking = await submitWebRanking(name, score);
+    if (remoteRanking && remoteRanking.length) {
+      state.rankingCache = remoteRanking;
+      updateRankingStatus('As pontuações ficam visíveis para todos os alunos que abrirem a versão publicada.', true);
+      return remoteRanking;
+    }
+  } catch (err) {
+    console.warn(err);
+    updateRankingStatus('Não foi possível conectar ao placar web agora. O jogo continuou salvando neste aparelho.', false);
+  }
+  return localRanking;
+}
+
+function renderRanking(list = null) {
+  const ranking = list || state.rankingCache || getRanking();
+  ui.ranking.innerHTML = '';
+  if (!ranking.length) {
+    ui.ranking.innerHTML = '<div class="mini-card"><strong>Sem pontuações ainda</strong>Quando os alunos terminarem o jogo, o ranking aparecerá aqui.</div>';
+    ui.bestScoreText.textContent = 'Ainda sem recorde';
+    ui.bestScoreSub.textContent = 'Quando alguém finalizar o jogo, o melhor resultado aparecerá aqui.';
+    return;
+  }
+  ranking.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = 'rank-row';
+    row.innerHTML = `
+      <div class="rank-pos">${idx + 1}</div>
+      <div><strong>${item.name}</strong><div class="small">melhor pontuação salva</div></div>
+      <div><strong>${item.score}</strong> pts</div>
+    `;
+    ui.ranking.appendChild(row);
+  });
+  ui.bestScoreText.textContent = `${ranking[0].name} — ${ranking[0].score} pontos`;
+  ui.bestScoreSub.textContent = isWebRankingEnabled()
+    ? 'Maior pontuação compartilhada na versão web.'
+    : 'Maior pontuação registrada neste aparelho.';
+}
+
+async function hydrateRanking() {
+  const localRanking = getRanking();
+  state.rankingCache = localRanking;
+  if (!isWebRankingEnabled()) {
+    updateRankingStatus('O placar está salvo apenas neste aparelho. Para compartilhar na web, conecte a URL do Apps Script no bloco de configuração do arquivo.', false);
+    renderRanking(localRanking);
+    return;
+  }
+  try {
+    const remoteRanking = await fetchWebRanking();
+    if (remoteRanking && remoteRanking.length) {
+      state.rankingCache = remoteRanking;
+    }
+    updateRankingStatus('As pontuações ficam visíveis para todos os alunos que abrirem a versão publicada.', true);
+    renderRanking(state.rankingCache);
+  } catch (err) {
+    console.warn(err);
+    updateRankingStatus('A conexão com o ranking web falhou. O jogo vai usar o placar local neste aparelho.', false);
+    renderRanking(localRanking);
+  }
+}
+
+function openMode(mode) {
+  const explore = mode === 'explore';
+  ui.exploreSection.classList.toggle('hidden', !explore);
+  ui.gameSection.classList.toggle('hidden', explore);
+}
+
+function createGameQuestion() {
+  const round = state.game.round;
+  const phase = phaseForRound(round);
+  const keys = Object.keys(molecules);
+  const key = keys[Math.floor(Math.random() * keys.length)];
+  const mol = molecules[key];
+
+  if (phase === 1) {
+    const peak = mol.peaks[Math.floor(Math.random() * mol.peaks.length)];
+    return {
+      phase,
+      title: 'Fase 1 — Em que região está a banda?',
+      moleculeKey: key,
+      targetPeak: peak,
+      question: `A banda destacada em ~${peak.center} cm⁻¹ pertence a qual região geral do IR?`,
+      options: shuffle([
+        'Região alta (X–H / C–H)',
+        'Região de triplas',
+        'Região de duplas / carbonila',
+        'Impressão digital'
+      ]),
+      answer: getRegionLabel(peak.center),
+      explanation: `A banda ${peak.label} em ~${peak.center} cm⁻¹ cai em: ${getRegionLabel(peak.center)}.`
+    };
+  }
+
+  if (phase === 2) {
+    const peak = mol.peaks[Math.floor(Math.random() * mol.peaks.length)];
+    const allLabels = getAllLabels().filter(label => label !== peak.label);
+    return {
+      phase,
+      title: 'Fase 2 — Qual vibração é essa?',
+      moleculeKey: key,
+      targetPeak: peak,
+      question: `No espectro exibido, qual vibração/grupo está associada à banda destacada em ~${peak.center} cm⁻¹?`,
+      options: shuffle([peak.label, ...shuffle(allLabels).slice(0, 3)]),
+      answer: peak.label,
+      explanation: peak.info
+    };
+  }
+
+  const wrongOptions = shuffle(keys.filter(k => k !== key)).slice(0, 3).map(k => molecules[k].name);
+  return {
+    phase,
+    title: 'Fase 3 — Descubra a molécula',
+    moleculeKey: key,
+    targetPeak: null,
+    question: 'Observe o espectro completo e escolha a molécula mais compatível com o padrão apresentado.',
+    options: shuffle([mol.name, ...wrongOptions]),
+    answer: mol.name,
+    explanation: `A resposta correta é ${mol.name}, porque o conjunto das bandas corresponde a: ${mol.description}`
+  };
+}
+
+
+function getMedalByScore(score) {
+  if (score >= 1100) return { name: 'IR Master', emoji: '💎', className: 'medal-master' };
+  if (score >= 800) return { name: 'Ouro', emoji: '🥇', className: 'medal-gold' };
+  if (score >= 500) return { name: 'Prata', emoji: '🥈', className: 'medal-silver' };
+  if (score >= 250) return { name: 'Bronze', emoji: '🥉', className: 'medal-bronze' };
+  return { name: 'Sem medalha', emoji: '🎯', className: '' };
+}
+
+function renderLives() {
+  const hearts = [];
+  for (let i = 0; i < 3; i++) {
+    hearts.push(`<span class="life ${i < state.game.lives ? '' : 'lost'}">❤️</span>`);
+  }
+  ui.gameLives.innerHTML = hearts.join('');
+}
+
+function updateMedalHud() {
+  const medal = getMedalByScore(state.game.score);
+  ui.gameMedal.innerHTML = `<span class="${medal.className}">${medal.emoji} ${medal.name}</span>`;
+}
+
+function ensureAudio() {
+  if (!state.soundEnabled) return null;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return null;
+  if (!state.audioCtx) state.audioCtx = new AudioCtx();
+  if (state.audioCtx.state === 'suspended') state.audioCtx.resume().catch(() => {});
+  return state.audioCtx;
+}
+
+function playTone(freq = 440, duration = 0.12, type = 'sine', gainValue = 0.04) {
+  const ctx = ensureAudio();
+  if (!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(gainValue, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + duration);
+}
+
+function playCorrectSound() {
+  playTone(660, 0.08, 'triangle', 0.05);
+  setTimeout(() => playTone(880, 0.12, 'triangle', 0.04), 90);
+}
+
+function playWrongSound() {
+  playTone(220, 0.14, 'sawtooth', 0.045);
+  setTimeout(() => playTone(180, 0.16, 'sawtooth', 0.035), 80);
+}
+
+function playStartSound() {
+  playTone(440, 0.08, 'sine', 0.04);
+  setTimeout(() => playTone(550, 0.08, 'sine', 0.035), 70);
+  setTimeout(() => playTone(660, 0.12, 'sine', 0.03), 140);
+}
+
+function playWinSound() {
+  [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => playTone(f, 0.12, 'triangle', 0.04), i * 90));
+}
+
+function playGameOverSound() {
+  [300, 240, 180].forEach((f, i) => setTimeout(() => playTone(f, 0.16, 'sawtooth', 0.04), i * 110));
+}
+
+function syncSoundButtons() {
+  const label = state.soundEnabled ? '🔊 Sons ligados' : '🔇 Sons desligados';
+  const compact = state.soundEnabled ? '🔊 Som' : '🔇 Som';
+  if (ui.soundToggleBtn) ui.soundToggleBtn.textContent = label;
+  if (ui.soundToggleGameBtn) ui.soundToggleGameBtn.textContent = compact;
+}
+
+function toggleSound() {
+  state.soundEnabled = !state.soundEnabled;
+  localStorage.setItem('ir_sound_enabled', JSON.stringify(state.soundEnabled));
+  syncSoundButtons();
+  if (state.soundEnabled) playTone(600, 0.08, 'sine', 0.03);
+}
+
+function showFinalScreen({ champion=false, byTimeout=false, byLives=false }) {
+  const medal = getMedalByScore(state.game.score);
+  ui.finalScreen.classList.remove('hidden');
+  ui.finalScreen.classList.add('flash');
+  setTimeout(() => ui.finalScreen.classList.remove('flash'), 500);
+  ui.finalScore.textContent = `${state.game.score} pts`;
+  ui.finalMedal.innerHTML = `${medal.emoji} ${medal.name}`;
+  ui.finalLives.textContent = `${state.game.lives}`;
+  ui.finalStreak.textContent = `${state.game.bestStreak}`;
+  if (champion) {
+    ui.finalTitle.textContent = 'Campeão da turma no momento';
+    ui.finalSubtitle.textContent = `${state.playerName} assumiu o topo do ranking. Hora de desafiar a sala inteira.`;
+    ui.finalCrown.textContent = '👑';
+  } else if (byLives) {
+    ui.finalTitle.textContent = 'Suas vidas acabaram';
+    ui.finalSubtitle.textContent = `${state.playerName} terminou com ${state.game.score} pontos. Tente de novo para subir no ranking.`;
+    ui.finalCrown.textContent = '💥';
+  } else if (byTimeout) {
+    ui.finalTitle.textContent = 'Tempo encerrado';
+    ui.finalSubtitle.textContent = `${state.playerName} marcou ${state.game.score} pontos em 140 s.`;
+    ui.finalCrown.textContent = '⏱️';
+  } else {
+    ui.finalTitle.textContent = 'Desafio concluído';
+    ui.finalSubtitle.textContent = `${state.playerName} concluiu as 3 fases. Veja sua medalha e tente melhorar.`;
+    ui.finalCrown.textContent = '🏁';
+  }
+}
+
+function hideFinalScreen() {
+  ui.finalScreen.classList.add('hidden');
+}
+
+function formatTime(seconds) {
+  const safe = Math.max(0, Math.ceil(seconds));
+  const min = Math.floor(safe / 60);
+  const sec = safe % 60;
+  return `${min}:${String(sec).padStart(2, '0')}`;
+}
+
+function updateGameHud() {
+  ui.playerNameBadge.textContent = state.playerName || 'Visitante';
+  ui.gameScore.textContent = state.game.score;
+  ui.gameStreak.textContent = state.game.streak;
+  ui.gameTimer.textContent = `${formatTime(state.game.timeLeft)}`;
+  ui.phaseLabel.textContent = `Fase ${state.game.phase}`;
+  ui.roundLabel.textContent = `Rodada ${state.game.round} / ${state.game.totalRounds}`;
+  ui.phaseFill.style.width = `${(state.game.round / state.game.totalRounds) * 100}%`;
+  renderLives();
+  updateMedalHud();
+}
+
+function renderGameQuestion() {
+  const q = state.game.current;
+  if (!q) return;
+  state.game.phase = q.phase;
+  ui.challengeTitle.textContent = q.title;
+  ui.questionBox.innerHTML = `<strong>${q.question}</strong>`;
+  ui.challengeHint.innerHTML = q.phase === 3
+    ? 'Na fase final, use o <strong>espectro inteiro</strong> para decidir.'
+    : `Banda-alvo destacada: <strong>${q.targetPeak.label} — ${q.targetPeak.center} cm⁻¹</strong>`;
+
+  ui.gameAnswers.innerHTML = '';
+  ui.gameFeedback.textContent = '';
+  ui.gameFeedback.className = 'feedback';
+  ui.gameExplanation.textContent = '';
+  ui.nextQuestionBtn.classList.add('hidden');
+  ui.restartGameBtn.classList.add('hidden');
+  hideFinalScreen();
+
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'answer';
+    btn.textContent = opt;
+    btn.addEventListener('click', () => answerGameQuestion(btn, opt));
+    ui.gameAnswers.appendChild(btn);
+  });
+
+  drawSpectrumToCanvas(ui.gameCanvas, molecules[q.moleculeKey], {
+    showRegions: true,
+    showLabels: q.phase === 3,
+    highlightPeak: q.targetPeak,
+    height: 300
+  });
+
+  updateGameHud();
+}
+
+function stopGameTimer() {
+  if (state.game.timerHandle) {
+    clearInterval(state.game.timerHandle);
+    state.game.timerHandle = null;
+  }
+}
+
+function startGameTimer() {
+  stopGameTimer();
+  updateGameHud();
+  state.game.timerHandle = setInterval(() => {
+    state.game.timeLeft = Math.max(0, state.game.timeLeft - 1);
+    updateGameHud();
+    if (state.game.timeLeft <= 0) {
+      stopGameTimer();
+      if (state.game.running) finishGame(true);
+    }
+  }, 1000);
+}
+
+function startGame() {
+  if (!state.playerName) setPlayerName(ui.playerNameInput.value || ui.overlayNameInput.value || 'Visitante');
+  state.game = {
+    running: true,
+    totalRounds: 9,
+    round: 1,
+    phase: 1,
+    score: 0,
+    streak: 0,
+    bestStreak: 0,
+    lives: 3,
+    answered: false,
+    current: createGameQuestion(),
+    timeLeft: APP_CONFIG.gameDurationSeconds,
+    timerHandle: null
+  };
+  openMode('game');
+  renderGameQuestion();
+  startGameTimer();
+  playStartSound();
+}
+
+
+
+function answerGameQuestion(button, selected) {
+  if (!state.game.running || state.game.answered) return;
+  const q = state.game.current;
+  const buttons = [...ui.gameAnswers.querySelectorAll('.answer')];
+  buttons.forEach(btn => btn.disabled = true);
+  state.game.answered = true;
+
+  if (selected === q.answer) {
+    state.game.streak += 1;
+    state.game.bestStreak = Math.max(state.game.bestStreak, state.game.streak);
+    const gained = 100 + (state.game.streak - 1) * 20;
+    state.game.score += gained;
+    button.classList.add('correct');
+    ui.gameFeedback.textContent = `Correto! +${gained} pontos`;
+    ui.gameFeedback.className = 'feedback good';
+    playCorrectSound();
+  } else {
+    state.game.streak = 0;
+    state.game.lives = Math.max(0, state.game.lives - 1);
+    button.classList.add('wrong');
+    const correctBtn = buttons.find(btn => btn.textContent === q.answer);
+    if (correctBtn) correctBtn.classList.add('correct');
+    ui.gameFeedback.textContent = state.game.lives > 0 ? `Resposta incorreta. Você perdeu 1 vida.` : 'Resposta incorreta. Suas vidas acabaram.';
+    ui.gameFeedback.className = 'feedback bad';
+    playWrongSound();
+  }
+
+  ui.gameExplanation.textContent = q.explanation;
+  updateGameHud();
+
+  if (state.game.lives <= 0) {
+    finishGame(false, true);
+  } else if (state.game.round >= state.game.totalRounds) {
+    finishGame();
+  } else {
+    ui.nextQuestionBtn.classList.remove('hidden');
+  }
+}
+
+function nextQuestion() {
+  state.game.round += 1;
+  state.game.phase = phaseForRound(state.game.round);
+  state.game.answered = false;
+  state.game.current = createGameQuestion();
+  renderGameQuestion();
+}
+
+async function finishGame(byTimeout = false, byLives = false) {
+  stopGameTimer();
+  state.game.running = false;
+  const ranking = await updateRanking(state.playerName || 'Visitante', state.game.score);
+  renderRanking(ranking);
+  const champion = Array.isArray(ranking) && ranking.length && ranking[0].name.toLowerCase() === (state.playerName || 'Visitante').toLowerCase() && ranking[0].score === state.game.score;
+  ui.nextQuestionBtn.classList.add('hidden');
+  ui.restartGameBtn.classList.remove('hidden');
+  ui.challengeHint.innerHTML = byTimeout
+    ? `<strong>Tempo encerrado!</strong> ${state.playerName} marcou ${state.game.score} pontos em 140 s.`
+    : byLives
+      ? `<strong>Fim de jogo por vidas.</strong> ${state.playerName} marcou ${state.game.score} pontos.`
+      : `<strong>Fim de jogo!</strong> ${state.playerName} marcou ${state.game.score} pontos.`;
+  ui.questionBox.innerHTML = champion
+    ? `<strong>Você assumiu o topo do ranking.</strong><br>Mostre a tela para a turma e veja quem consegue superar sua pontuação.`
+    : `<strong>Desafio concluído.</strong><br>Confira o ranking e toque em “Jogar novamente” para tentar superar a maior pontuação.`;
+  showFinalScreen({ champion, byTimeout, byLives });
+  if (champion || (!byLives && !byTimeout)) {
+    playWinSound();
+  } else {
+    playGameOverSound();
+  }
+}
+
+
+function animate(ts) {
+  state.animationTime = ts;
+  drawMolecule();
+  requestAnimationFrame(animate);
+}
+
+function saveNameFlow(value) {
+  setPlayerName(value);
+  ui.overlay.classList.add('hidden');
+  renderRanking();
+  updateGameHud();
+}
+
+ui.moleculeSelect.addEventListener('change', () => {
+  state.currentKey = ui.moleculeSelect.value;
+  state.selectedPeak = currentMolecule().peaks[0];
+  renderExplore();
+});
+
+ui.toggleRegions.addEventListener('click', () => {
+  state.showRegions = !state.showRegions;
+  ui.toggleRegions.classList.toggle('active', state.showRegions);
+  renderExplore();
+});
+
+ui.toggleLabels.addEventListener('click', () => {
+  state.showLabels = !state.showLabels;
+  ui.toggleLabels.classList.toggle('active', state.showLabels);
+  renderExplore();
+});
+
+ui.randomMolecule.addEventListener('click', () => {
+  const keys = Object.keys(molecules);
+  state.currentKey = keys[Math.floor(Math.random() * keys.length)];
+  ui.moleculeSelect.value = state.currentKey;
+  state.selectedPeak = currentMolecule().peaks[Math.floor(Math.random() * currentMolecule().peaks.length)];
+  renderExplore();
+});
+
+ui.spectrumCanvas.addEventListener('click', (e) => handleCanvasTouch(e));
+ui.goExploreBtn.addEventListener('click', () => openMode('explore'));
+ui.goGameBtn.addEventListener('click', () => openMode('game'));
+ui.startChallengeFromExplore.addEventListener('click', () => openMode('game'));
+ui.startGameBtn.addEventListener('click', startGame);
+ui.nextQuestionBtn.addEventListener('click', nextQuestion);
+ui.restartGameBtn.addEventListener('click', startGame);
+ui.saveNameBtn.addEventListener('click', () => saveNameFlow(ui.playerNameInput.value));
+ui.overlaySaveBtn.addEventListener('click', () => saveNameFlow(ui.overlayNameInput.value));
+ui.soundToggleBtn.addEventListener('click', toggleSound);
+ui.soundToggleGameBtn.addEventListener('click', toggleSound);
+ui.resetRankingBtn.addEventListener('click', () => {
+  localStorage.removeItem(STORAGE_KEY);
+  state.rankingCache = [];
+  renderRanking();
+  if (isWebRankingEnabled()) {
+    updateRankingStatus('O reset manual limpou apenas o placar local deste aparelho. O ranking web permanece publicado.', true);
+  }
+});
+
+window.addEventListener('resize', () => {
+  renderExplore();
+  if (state.game.current) {
+    drawSpectrumToCanvas(ui.gameCanvas, molecules[state.game.current.moleculeKey], {
+      showRegions: true,
+      showLabels: state.game.current.phase === 3,
+      highlightPeak: state.game.current.targetPeak,
+      height: 300
+    });
+  }
+});
+
+populateSelect();
+setPlayerName(state.playerName || 'Visitante');
+if (state.playerName && state.playerName !== 'Visitante') ui.overlay.classList.add('hidden');
+state.selectedPeak = currentMolecule().peaks[0];
+renderExplore();
+hydrateRanking();
+syncSoundButtons();
+updateGameHud();
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
