@@ -122,3 +122,7 @@ Para ranking compartilhado entre todos os celulares, é necessário usar o `rank
 ## Licença
 
 MIT.
+
+
+## Atualização importante de cache no celular
+Se o GitHub Pages ainda mostrar uma versão antiga no celular, faça uma recarga forçada do navegador ou limpe o cache do site. Esta versão remove a exibição da resposta na pergunta das fases 1 e 2.

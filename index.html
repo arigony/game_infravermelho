@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>IR Mobile Game Lab</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>IR Mobile Game Lab v4</title>
 <style>
 :root {
   --bg: #07111f;
@@ -1019,6 +1022,11 @@ function drawSpectrumToCanvas(canvas, mol, options = {}) {
       ctx.beginPath();
       ctx.arc(x, plot.top + 10, 4, 0, Math.PI * 2);
       ctx.fill();
+      if (!options.showLabels && isTarget) {
+        ctx.fillStyle = 'rgba(139,243,193,0.95)';
+        ctx.font = '600 12px Inter, system-ui, sans-serif';
+        ctx.fillText('banda-alvo', Math.max(plot.left + 4, Math.min(x - 28, plot.right - 70)), plot.top + 24);
+      }
     }
   });
 
@@ -1562,7 +1570,9 @@ function renderGameQuestion() {
   ui.questionBox.innerHTML = `<strong>${q.question}</strong>`;
   ui.challengeHint.innerHTML = q.phase === 3
     ? 'Na fase final, use o <strong>espectro inteiro</strong> para decidir.'
-    : `Banda-alvo destacada: <strong>${q.targetPeak.label} — ${q.targetPeak.center} cm⁻¹</strong>`;
+    : q.phase === 2
+      ? 'Banda-alvo destacada no espectro. Observe apenas a <strong>posição</strong> e o <strong>formato</strong> da absorção.'
+      : 'Banda-alvo destacada no espectro. Use apenas a <strong>posição aproximada</strong> para decidir a região geral do IR.';
 
   ui.gameAnswers.innerHTML = '';
   ui.gameFeedback.textContent = '';
